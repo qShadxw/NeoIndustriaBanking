@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generatered",
+  "textures": {
+    "layer0": "nibanking:item/iron_coin"
+  }
+}

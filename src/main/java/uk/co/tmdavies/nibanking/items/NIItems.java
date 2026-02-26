@@ -16,7 +16,7 @@ public class NIItems {
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> NI_TAB = CREATIVE_MODE_TABS.register(NIBanking.MODID + "-creativetab", () ->
             CreativeModeTab
                     .builder()
-                    .title(Component.translatable("itemGroup.neoindustriabanking"))
+                    .title(Component.translatable("itemGroup.nibanking"))
                     .icon(() -> NIItems.NETHERITE_COIN.get().getDefaultInstance())
                     .build()
     );
