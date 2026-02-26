@@ -23,7 +23,7 @@ public class NNWebSocket implements WebSocket.Listener {
                 .buildAsync(URI.create(endPoint), this)
                 .thenAccept(ws -> {
                     this.socket = ws;
-                    NIBanking.LOGGER.info("[NNWebSocket] WebSocket sucessfully connected.");
+                    NIBanking.LOGGER.info("[NNWebSocket] WebSocket successfully connected.");
                 })
                 .exceptionally(exception -> {
                     NIBanking.LOGGER.info("[NNWebSocket] WebSocket failed to connect. {}", exception.getMessage());
