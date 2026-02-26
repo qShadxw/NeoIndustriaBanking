@@ -1,0 +1,22 @@
+no card
+check if your you?
+
+if possible:
+- request money
+- wait for use to press accept
+
+if not possible:
+- take money from user account
+
+order of payment:
+- coins in inventory
+- bank account
+
+when ordering:
+- replace shopping list for paper with transaction id
+- click clerk with paper completed shop order
+- fallback:
+- - timeout 2 mins, if completed, refund money
+
+Request money from player with server.
+send money from server to shop owner

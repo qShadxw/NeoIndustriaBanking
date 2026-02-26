@@ -1,6 +1,6 @@
 {
-  "parent": "minecraft:item/generatered",
+  "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "nibanking:item/copper_coin.png"
+    "layer0": "nibanking:item/copper_coin"
   }
 }

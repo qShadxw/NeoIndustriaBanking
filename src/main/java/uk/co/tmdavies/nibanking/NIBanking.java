@@ -9,7 +9,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
 import uk.co.tmdavies.nibanking.items.NIItems;
 import uk.co.tmdavies.nibanking.listeners.ServerListener;
-import uk.co.tmdavies.nibanking.managers.ModManager;
+import uk.co.tmdavies.nibanking.managers.NNWebSocket;
 
 @Mod(NIBanking.MODID)
 public class NIBanking {
@@ -17,22 +17,22 @@ public class NIBanking {
     public static final String MODID = "nibanking";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    // Managers
-    public static ModManager modManager;
+    // WebSocket
+    public static NNWebSocket webSocket;
 
     public NIBanking(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
 
-        NIItems.ITEMS.register(modEventBus);
-        NIItems.CREATIVE_MODE_TABS.register(modEventBus);
-
-//        modManager = new ModManager(this, modEventBus, modContainer, "uk.co.tmdavies.nibanking.listeners");
-//        modManager.registerEvents();
+        NIItems.registerItems(modEventBus);
+        NIItems.registerCreativeTab(modEventBus);
 
         NeoForge.EVENT_BUS.register(new ServerListener());
     }
 
     public void commonSetup(FMLCommonSetupEvent event) {
         LOGGER.info("Setting up...");
+
+        webSocket = new NNWebSocket("endPoint.here");
+        webSocket.connect();
     }
 }
