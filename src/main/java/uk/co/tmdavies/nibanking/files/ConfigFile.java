@@ -76,6 +76,7 @@ public class ConfigFile {
 
         JsonObject webSocketObj = new JsonObject();
         webSocketObj.addProperty("url", "ws://ws.example.com:443");
+        webSocketObj.addProperty("apikey", "69420");
 
         connectionObject.add("NeoNetworkIRS", neoNetworkIRSObj);
         connectionObject.add("WebSocket", webSocketObj);

@@ -26,7 +26,7 @@ public class ServerListener {
 
         // API
         NIBanking.neoNetworkIRS = new NeoNetworkIRS(NIBanking.connectionsFile.get("NeoNetworkIRS").getAsJsonObject().get("apikey").getAsString());
-        NIBanking.webSocket = new NNWebSocket(NIBanking.connectionsFile.get("WebSocket").getAsJsonObject().get("url").getAsString());
+        NIBanking.webSocket = new NNWebSocket(NIBanking.connectionsFile.get("WebSocket").getAsJsonObject().get("url").getAsString(), NIBanking.connectionsFile.get("WebSocket").getAsJsonObject().get("apikey").getAsString());
     }
 
     @SubscribeEvent
