@@ -132,6 +132,8 @@ dependencies {
 
     implementation files("libs/create-1.21.1-6.0.9.jar")
 
+    implementation "org.spongepowered:mixin:0.8.5"
+
     // For more info:
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
