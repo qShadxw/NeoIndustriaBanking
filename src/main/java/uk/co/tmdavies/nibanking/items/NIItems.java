@@ -1,5 +1,6 @@
 package uk.co.tmdavies.nibanking.items;
 
+import com.tterrag.registrate.util.entry.ItemEntry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -9,37 +10,25 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import uk.co.tmdavies.nibanking.NIBanking;
+import uk.co.tmdavies.nibanking.NIRegistrate;
 
 import java.util.HashMap;
 
 public class NIItems {
-    // Register
-    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(NIBanking.MODID);
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, NIBanking.MODID);
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> NI_TAB = CREATIVE_MODE_TABS.register(NIBanking.MODID + "_tab", () ->
-            CreativeModeTab
-                    .builder()
-                    .title(Component.translatable("itemGroup.nibanking"))
-                    .icon(() -> NIItems.NIBANKING_ITEMS.get("iron_coin").get().getDefaultInstance())
-                    .displayItems(((itemDisplayParameters, output) -> NIItems.NIBANKING_ITEMS.forEach((itemId, item) -> output.accept(item))))
-                    .build()
-    );
-
-    // Items
-    public static final HashMap<String, DeferredItem<Item>> NIBANKING_ITEMS = new HashMap<>() {{
-        put("copper_coin", ITEMS.registerSimpleItem("copper_coin"));
-        put("iron_coin", ITEMS.registerSimpleItem("iron_coin"));
-        put("gold_coin", ITEMS.registerSimpleItem("gold_coin"));
-        put("netherite_coin", ITEMS.registerSimpleItem("netherite_coin"));
-        put("zinc_coin", ITEMS.registerSimpleItem("zinc_coin"));
-        put("debit_card", ITEMS.registerSimpleItem("debit_card"));
+    // System Items
+    public static final HashMap<String, ItemEntry<?>> NIBANKING_SYSTEM_ITEMS = new HashMap<>() {{
+        put("base_coin", NIBanking.REGISTRATE.item("base_coin", prop -> new CoinItem(0, prop)).register());
+        put("debit_card", NIBanking.REGISTRATE.item("debit_card", CardItem::new).register());
     }};
 
-    public static void registerItems(IEventBus modEventBus) {
-        ITEMS.register(modEventBus);
-    }
+    // Items
+    public static final HashMap<String, ItemEntry<?>> NIBANKING_ITEMS = new HashMap<>() {{
+        put("copper_coin", NIBanking.REGISTRATE.item("copper_coin", prop -> new CoinItem(1, prop)).register());
+        put("iron_coin", NIBanking.REGISTRATE.item("iron_coin", prop -> new CoinItem(5, prop)).register());
+        put("zinc_coin", NIBanking.REGISTRATE.item("zinc_coin", prop -> new CoinItem(10, prop)).register());
+        put("gold_coin", NIBanking.REGISTRATE.item("gold_coin", prop -> new CoinItem(25, prop)).register());
+        put("netherite_coin", NIBanking.REGISTRATE.item("netherite_coin", prop -> new CoinItem(50, prop)).register());
+    }};
 
-    public static void registerCreativeTab(IEventBus modEventBus) {
-        CREATIVE_MODE_TABS.register(modEventBus);
-    }
+    public static void register() {}
 }

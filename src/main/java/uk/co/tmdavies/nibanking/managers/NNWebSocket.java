@@ -137,7 +137,7 @@ public class NNWebSocket implements WebSocket.Listener {
 
     public void onMigratorRequest(String fromUUID, String toUUID, String transactionId, int amount, String reference) {
         NIBanking.LOGGER.info("[NNWebSocket] Request called. {} {} {} {} {}", fromUUID, toUUID, transactionId, amount, reference);
-        this.transactionCache.put(transactionId, new NNTransaction(transactionId, toUUID, fromUUID, amount, reference));
+        this.transactionCache.put(transactionId, new NNTransaction(transactionId, toUUID, fromUUID, amount, reference, false));
     }
 
     public void onMigratorApprove(String transactionId, boolean approved) {

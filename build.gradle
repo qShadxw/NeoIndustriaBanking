@@ -19,6 +19,8 @@ group = mod_group_id
 
 repositories {
     // Add here additional repositories if required by some of the dependencies below.
+    maven { url = "https://maven.createmod.net" } // Ponder, Flywheel
+    maven { url = "https://maven.ithundxr.dev/snapshots" } // Registrate
 }
 
 base {
@@ -130,7 +132,16 @@ dependencies {
     // Example project dependency using a sister or child project:
     // implementation project(":myproject")
 
-    implementation files("libs/create-1.21.1-6.0.9.jar")
+    implementation files("libs/create-${create_version}.jar")
+    compileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-$minecraft_version:$flywheel_version")
+    implementation(jarJar("net.createmod.ponder:ponder-neoforge:$ponder_version+mc$minecraft_version") {
+        version {
+            strictly "[$ponder_version+mc$minecraft_version,)"
+            prefer "$ponder_version+mc$minecraft_version"
+        }
+    })
+
+    implementation("com.tterrag.registrate:Registrate:${registrate_version}")
 
     implementation "org.spongepowered:mixin:0.8.5"
 

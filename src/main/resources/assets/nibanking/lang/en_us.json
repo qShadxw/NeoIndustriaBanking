@@ -3,10 +3,14 @@
   "itemGroup.nibanking": "NeoIndustria Banking",
 
   "_comment.itemNames": "Item Names",
+  "item.nibanking.base_coin": "Base Coin",
   "item.nibanking.copper_coin": "Copper Coin",
   "item.nibanking.gold_coin": "Gold Coin",
   "item.nibanking.iron_coin": "Iron Coin",
   "item.nibanking.netherite_coin": "Netherite Coin",
   "item.nibanking.zinc_coin": "Zinc Coin",
-  "item.nibanking.debit_card": "Debit Card"
+  "item.nibanking.debit_card": "Debit Card",
+
+  "_comment.toolTips": "Item ToolTips",
+  "tooltip.nibanking.coin_item": "&7Value: &6$value"
 }

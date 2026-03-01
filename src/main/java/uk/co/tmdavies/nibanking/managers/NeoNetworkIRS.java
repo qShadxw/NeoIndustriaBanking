@@ -103,4 +103,9 @@ public class NeoNetworkIRS {
                     shopKeeper, amount, response.get("data").getAsJsonObject().get("txID").getAsString()));
         }
     }
+
+    public boolean hasCompleted(String transactionId) {
+        // Check if transaction is complete
+        return false;
+    }
 }

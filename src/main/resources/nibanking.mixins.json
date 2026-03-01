@@ -4,7 +4,9 @@
   "package": "uk.co.tmdavies.nibanking.mixins",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "ShoppingListItemMixin"
+    "FilteringBehaviourAccessor",
+    "StockTickerInteractionHandlerMixin",
+    "TableClothFilteringBehaviourMixin"
   ],
   "injectors": {
     "defaultRequire": 1
