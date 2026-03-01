@@ -4,9 +4,12 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.player.Player;
 import org.codehaus.plexus.util.CachedMap;
 import uk.co.tmdavies.nibanking.NIBanking;
 import uk.co.tmdavies.nibanking.objects.NNTransaction;
+import uk.co.tmdavies.nibanking.utils.Utils;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -14,6 +17,7 @@ import java.net.http.WebSocket;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -23,14 +27,18 @@ public class NNWebSocket implements WebSocket.Listener {
     private WebSocket socket;
     private final String endPoint;
     private final String apiKey;
+    private final MinecraftServer server;
 
-    public NNWebSocket(String endPoint, String apiKey) {
+    public NNWebSocket(String endPoint, String apiKey, MinecraftServer server) {
         this.endPoint = endPoint;
         this.apiKey = apiKey;
         this.transactionCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(Duration.ofMinutes(2L))
                 .expireAfterAccess(Duration.ofMillis(1L))
+                .removalListener((removalNotification) ->
+                        onTransactionTimeout((String) removalNotification.getKey(), (NNTransaction) removalNotification.getValue()))
                 .build();
+        this.server = server;
     }
 
     public void connect() {
@@ -130,5 +138,22 @@ public class NNWebSocket implements WebSocket.Listener {
         }
 
         NIBanking.LOGGER.info("[NNWebSocket] Got transaction: [{}] [{}] [{}]", transaction.transactionId(), transaction.toUUID(), transaction.fromUUID());
+    }
+
+    public void onTransactionTimeout(String transactionId, NNTransaction transaction) {
+        Player toPlayer = this.server.getPlayerList().getPlayer(UUID.fromString(transaction.toUUID()));
+        Player fromPlayer = this.server.getPlayerList().getPlayer(UUID.fromString(transaction.fromUUID()));
+
+        if (toPlayer != null) {
+            toPlayer.sendSystemMessage(Utils.Chat("&cTransaction has timed out. Please ask customer to replace the order. [txID: %s]", transactionId));;
+        } else {
+            NIBanking.LOGGER.error("[TransactionTimeout] toPlayer is null for {}. [{}]", transactionId, transaction.toUUID());
+        }
+
+        if (fromPlayer != null) {
+            fromPlayer.sendSystemMessage(Utils.Chat("&cTransaction has timed out. Please replace your order if you wish to purchase. [txID: %s]", transactionId));
+        } else {
+            NIBanking.LOGGER.error("[TransactionTimeout] fromPlayer is null for {}. [{}]", transactionId, transaction.fromUUID());
+        }
     }
 }
