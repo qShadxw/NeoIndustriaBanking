@@ -16,6 +16,7 @@ import java.net.http.HttpClient;
 import java.net.http.WebSocket;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -23,7 +24,8 @@ import java.util.concurrent.CompletionStage;
 
 public class NNWebSocket implements WebSocket.Listener {
 
-    private final Cache<String, NNTransaction> transactionCache;
+    public final Cache<String, NNTransaction> transactionCache;
+
     private WebSocket socket;
     private final String endPoint;
     private final String apiKey;
@@ -34,11 +36,21 @@ public class NNWebSocket implements WebSocket.Listener {
         this.apiKey = apiKey;
         this.transactionCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(Duration.ofMinutes(2L))
-                .expireAfterAccess(Duration.ofMillis(1L))
                 .removalListener((removalNotification) ->
                         onTransactionTimeout((String) removalNotification.getKey(), (NNTransaction) removalNotification.getValue()))
                 .build();
         this.server = server;
+    }
+
+    public NNTransaction getTransactionFromPlayer(Player player) {
+        for (Map.Entry<String, NNTransaction> entry : transactionCache.asMap().entrySet()) {
+            NNTransaction transaction = entry.getValue();
+            if (transaction.fromUUID().equals(player.getUUID().toString())) {
+                return entry.getValue();
+            }
+        }
+
+        return null;
     }
 
     public void connect() {

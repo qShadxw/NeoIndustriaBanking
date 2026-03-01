@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "uk.co.tmdavies.nibanking.mixins",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "ShoppingListItemMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
