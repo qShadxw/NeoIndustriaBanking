@@ -4,11 +4,11 @@
 
   "_comment.itemNames": "Item Names",
   "item.nibanking.base_coin": "Base Coin",
-  "item.nibanking.copper_coin": "Copper Coin",
-  "item.nibanking.gold_coin": "Gold Coin",
+  "item.nibanking.copper_coin": "&6Copper Coin",
+  "item.nibanking.gold_coin": "&eGold Coin",
   "item.nibanking.iron_coin": "Iron Coin",
-  "item.nibanking.netherite_coin": "Netherite Coin",
-  "item.nibanking.zinc_coin": "Zinc Coin",
+  "item.nibanking.netherite_coin": "&7Netherite Coin",
+  "item.nibanking.zinc_coin": "&1Zinc Coin",
   "item.nibanking.debit_card": "Debit Card",
 
   "_comment.toolTips": "Item ToolTips",

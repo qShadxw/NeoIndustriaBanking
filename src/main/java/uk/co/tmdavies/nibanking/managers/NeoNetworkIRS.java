@@ -87,25 +87,20 @@ public class NeoNetworkIRS {
         target.sendSystemMessage(Utils.Chat("&aRef: %s", ref));
     }
 
-    public void requestMoney(String shopKeeper, Player customer, int amount, String ref) {
+    public void requestMoney(String shopKeeper, String customer, int amount, String ref) {
         HashMap<String, String> data = new HashMap<>() {{
             put("to", shopKeeper);
-            put("from", customer.getName().toString());
+            put("from", customer);
             put("amount", String.valueOf(amount));
             put("reference", ref);
         }};
         JsonObject response = doRequest("request", data);
-
-        if (response.get("success").getAsBoolean()) {
-//            shopKeeper.sendSystemMessage(Utils.Chat("Requested money from %s. Amount: %d. Transaction ID: %s",
+//
+//        if (response.get("success").getAsBoolean()) {
+//           shopKeeper.sendSystemMessage(Utils.Chat("Requested money from %s. Amount: %d. Transaction ID: %s",
 //                    customer.getName().toString(), amount, response.get("data").getAsJsonObject().get("txID").getAsString()));
-            customer.sendSystemMessage(Utils.Chat("Sending money to %s. Amount: %d. Transaction ID: %s",
-                    shopKeeper, amount, response.get("data").getAsJsonObject().get("txID").getAsString()));
-        }
-    }
-
-    public boolean hasCompleted(String transactionId) {
-        // Check if transaction is complete
-        return false;
+//            customer.sendSystemMessage(Utils.Chat("Sending money to %s. Amount: %d. Transaction ID: %s",
+//                    shopKeeper, amount, response.get("data").getAsJsonObject().get("txID").getAsString()));
+//        }
     }
 }

@@ -1,16 +1,7 @@
 package uk.co.tmdavies.nibanking.items;
 
 import com.tterrag.registrate.util.entry.ItemEntry;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredItem;
-import net.neoforged.neoforge.registries.DeferredRegister;
 import uk.co.tmdavies.nibanking.NIBanking;
-import uk.co.tmdavies.nibanking.NIRegistrate;
 
 import java.util.HashMap;
 

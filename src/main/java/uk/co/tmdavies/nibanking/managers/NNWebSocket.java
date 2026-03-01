@@ -15,16 +15,14 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
 import java.time.Duration;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 public class NNWebSocket implements WebSocket.Listener {
 
     public final Cache<String, NNTransaction> transactionCache;
+    public final List<NNTransaction> transactionsList;
 
     private WebSocket socket;
     private final String endPoint;
@@ -39,13 +37,16 @@ public class NNWebSocket implements WebSocket.Listener {
                 .removalListener((removalNotification) ->
                         onTransactionTimeout((String) removalNotification.getKey(), (NNTransaction) removalNotification.getValue()))
                 .build();
+        this.transactionsList = new ArrayList<>();
         this.server = server;
     }
 
     public NNTransaction getTransactionFromPlayer(Player player) {
+        String playerUUID = player.getStringUUID().replace("-", "");
         for (Map.Entry<String, NNTransaction> entry : transactionCache.asMap().entrySet()) {
             NNTransaction transaction = entry.getValue();
-            if (transaction.fromUUID().equals(player.getUUID().toString())) {
+
+            if (transaction.getFromUUID().equals(playerUUID)) {
                 return entry.getValue();
             }
         }
@@ -71,7 +72,6 @@ public class NNWebSocket implements WebSocket.Listener {
     }
 
     public void send(String message) {
-        NIBanking.LOGGER.info(String.valueOf(Objects.isNull(socket)));
         if (this.socket != null) {
             NIBanking.LOGGER.info("[NNWebSocket] Sending: {}", message);
             this.socket.sendText(message, true);
@@ -132,16 +132,16 @@ public class NNWebSocket implements WebSocket.Listener {
     }
 
     public void onWSSError(WebSocket webSocket, JsonObject response) {
-        NIBanking.LOGGER.error("[NNWebSocket] WSS encountered an error. {}", response.toString());
+        NIBanking.LOGGER.error("[NNWebSocket] WSS encountered an error: [{}]", response.toString());
     }
 
     public void onMigratorRequest(String fromUUID, String toUUID, String transactionId, int amount, String reference) {
-        NIBanking.LOGGER.info("[NNWebSocket] Request called. {} {} {} {} {}", fromUUID, toUUID, transactionId, amount, reference);
+        NIBanking.LOGGER.info("[NNWebSocket] Request called: [{}] [{}] [{}] [{}] [{}]", fromUUID, toUUID, transactionId, amount, reference);
         this.transactionCache.put(transactionId, new NNTransaction(transactionId, toUUID, fromUUID, amount, reference, false));
     }
 
     public void onMigratorApprove(String transactionId, boolean approved) {
-        NIBanking.LOGGER.info("[NNWebSocket] Approve called. {} {}", transactionId, approved);
+        NIBanking.LOGGER.info("[NNWebSocket] Approve called: [{}] [{}]", transactionId, approved);
 
         NNTransaction transaction = this.transactionCache.getIfPresent(transactionId);
 
@@ -149,23 +149,51 @@ public class NNWebSocket implements WebSocket.Listener {
             return;
         }
 
-        NIBanking.LOGGER.info("[NNWebSocket] Got transaction: [{}] [{}] [{}]", transaction.transactionId(), transaction.toUUID(), transaction.fromUUID());
+        transaction.setComplete(true);
+        this.transactionsList.add(transaction);
+
+        NIBanking.LOGGER.info("[NNWebSocket] Got transaction: [{}] [{}] [{}]", transaction.getTransactionId(), transaction.getToUUID(), transaction.getFromUUID());
     }
 
     public void onTransactionTimeout(String transactionId, NNTransaction transaction) {
-        Player toPlayer = this.server.getPlayerList().getPlayer(UUID.fromString(transaction.toUUID()));
-        Player fromPlayer = this.server.getPlayerList().getPlayer(UUID.fromString(transaction.fromUUID()));
+        UUID toUUID = Utils.reconstructUUID(transaction.getToUUID());
+        UUID fromUUID = Utils.reconstructUUID(transaction.getFromUUID());
+
+        if (toUUID == null || fromUUID == null) {
+            NIBanking.LOGGER.error("Failed to reconstruct UUIDs: [{}] [{}]", transaction.getToUUID(), transaction.getFromUUID());
+            return;
+        }
+
+        Player toPlayer = this.server.getPlayerList().getPlayer(toUUID);
+        Player fromPlayer = this.server.getPlayerList().getPlayer(fromUUID);
 
         if (toPlayer != null) {
             toPlayer.sendSystemMessage(Utils.Chat("&cTransaction has timed out. Please ask customer to replace the order. [txID: %s]", transactionId));;
         } else {
-            NIBanking.LOGGER.error("[TransactionTimeout] toPlayer is null for {}. [{}]", transactionId, transaction.toUUID());
+            NIBanking.LOGGER.error("[TransactionTimeout] toPlayer is null for {}. [{}]", transactionId, transaction.getToUUID());
         }
 
         if (fromPlayer != null) {
             fromPlayer.sendSystemMessage(Utils.Chat("&cTransaction has timed out. Please replace your order if you wish to purchase. [txID: %s]", transactionId));
         } else {
-            NIBanking.LOGGER.error("[TransactionTimeout] fromPlayer is null for {}. [{}]", transactionId, transaction.fromUUID());
+            NIBanking.LOGGER.error("[TransactionTimeout] fromPlayer is null for {}. [{}]", transactionId, transaction.getFromUUID());
         }
+
+        for (NNTransaction loopTransaction : this.transactionsList) {
+            if (loopTransaction.getTransactionId().equals(transactionId)) {
+                this.transactionsList.remove(loopTransaction);
+                break;
+            }
+        }
+    }
+
+    public boolean isTransactionComplete(NNTransaction transaction) {
+        for (NNTransaction loopTransaction : this.transactionsList) {
+            if (loopTransaction.getTransactionId().equals(transaction.getTransactionId())) {
+                return loopTransaction.isComplete();
+            }
+        }
+
+        return transaction.isComplete();
     }
 }
