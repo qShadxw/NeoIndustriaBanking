@@ -1,17 +1,25 @@
 package uk.co.tmdavies.nibanking.managers;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.codehaus.plexus.util.CachedMap;
 import uk.co.tmdavies.nibanking.NIBanking;
+import uk.co.tmdavies.nibanking.objects.NNTransaction;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.WebSocket;
+import java.time.Duration;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 public class NNWebSocket implements WebSocket.Listener {
+
+    private final Cache<String, NNTransaction> transactionCache;
     private WebSocket socket;
     private final String endPoint;
     private final String apiKey;
@@ -19,6 +27,10 @@ public class NNWebSocket implements WebSocket.Listener {
     public NNWebSocket(String endPoint, String apiKey) {
         this.endPoint = endPoint;
         this.apiKey = apiKey;
+        this.transactionCache = CacheBuilder.newBuilder()
+                .expireAfterWrite(Duration.ofMinutes(2L))
+                .expireAfterAccess(Duration.ofMillis(1L))
+                .build();
     }
 
     public void connect() {
@@ -53,13 +65,6 @@ public class NNWebSocket implements WebSocket.Listener {
 
     @Override
     public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
-        /*
-        Received: {"event":"auth","valid":true}
-        Received: {"event":"migrator","data":{"type":"request","txID":"88","from":"02c0f0725e8f46f8a4004b1722b293f0","to":"795ef1ea3a534c02abb75a62f037440e","amount":"1","reference":"Oi, give me money!"}}
-        Received: {"event":"migrator","data":{"type":"approve","txID":88,"from":"02c0f0725e8f46f8a4004b1722b293f0","to":"795ef1ea3a534c02abb75a62f037440e","amount":1,"reference":"Oi, give me money!","approved":false}}
-         */
-        //NIBanking.LOGGER.info("[NNWebSocket] Received: " + data);
-
         JsonObject response = JsonParser.parseString(String.valueOf(data)).getAsJsonObject();
 
         switch (response.get("event").getAsString()) {
@@ -101,7 +106,7 @@ public class NNWebSocket implements WebSocket.Listener {
 
         switch (type) {
             case "request" -> onMigratorRequest(fromUUID, toUUID, transactionId, amount, reference);
-            case "approve" -> onMigratorApprove(fromUUID, toUUID, transactionId, data.get("approved").getAsBoolean());
+            case "approve" -> onMigratorApprove(transactionId, data.get("approved").getAsBoolean());
             default -> NIBanking.LOGGER.error("[NNWebSocket] Invalid type from Migrator. [{}]", type);
         }
     }
@@ -112,9 +117,18 @@ public class NNWebSocket implements WebSocket.Listener {
 
     public void onMigratorRequest(String fromUUID, String toUUID, String transactionId, int amount, String reference) {
         NIBanking.LOGGER.info("[NNWebSocket] Request called. {} {} {} {} {}", fromUUID, toUUID, transactionId, amount, reference);
+        this.transactionCache.put(transactionId, new NNTransaction(transactionId, toUUID, fromUUID, amount, reference));
     }
 
-    public void onMigratorApprove(String fromUUID, String toUUID, String transactionId, boolean approved) {
-        NIBanking.LOGGER.info("[NNWebSocket] Approve called. {} {} {} {}", fromUUID, toUUID, transactionId, approved);
+    public void onMigratorApprove(String transactionId, boolean approved) {
+        NIBanking.LOGGER.info("[NNWebSocket] Approve called. {} {}", transactionId, approved);
+
+        NNTransaction transaction = this.transactionCache.getIfPresent(transactionId);
+
+        if (transaction == null) {
+            return;
+        }
+
+        NIBanking.LOGGER.info("[NNWebSocket] Got transaction: [{}] [{}] [{}]", transaction.transactionId(), transaction.toUUID(), transaction.fromUUID());
     }
 }
