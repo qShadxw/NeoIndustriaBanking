@@ -85,6 +85,9 @@ public class NNWebSocket implements WebSocket.Listener {
 
     @Override
     public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
+
+
+
         JsonObject response = JsonParser.parseString(String.valueOf(data)).getAsJsonObject();
 
         switch (response.get("event").getAsString()) {

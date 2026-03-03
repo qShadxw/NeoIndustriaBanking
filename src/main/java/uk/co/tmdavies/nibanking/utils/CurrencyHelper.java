@@ -4,16 +4,14 @@ import com.tterrag.registrate.util.entry.ItemEntry;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import uk.co.tmdavies.nibanking.NIBanking;
 import uk.co.tmdavies.nibanking.items.CoinItem;
 import uk.co.tmdavies.nibanking.items.NIItems;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class CurrencyHelper {
     public static List<CoinItem> getAllCoins() {
-        return NIItems.NIBANKING_ITEMS.values().stream()
+        return NIItems.NIBANKING_COINS.values().stream()
                 .map(entry -> (CoinItem) entry.get())
                 .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
                 .toList();
@@ -23,7 +21,7 @@ public class CurrencyHelper {
         Item item = itemStack.getItem();
         boolean isValid = false;
 
-        for (ItemEntry<?> items : NIItems.NIBANKING_ITEMS.values()) {
+        for (ItemEntry<?> items : NIItems.NIBANKING_COINS.values()) {
             if (items.is(item.builtInRegistryHolder().key().location())) {
                 isValid = true;
             }

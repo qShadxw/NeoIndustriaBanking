@@ -10,6 +10,7 @@
   "item.nibanking.netherite_coin": "&7Netherite Coin",
   "item.nibanking.zinc_coin": "&1Zinc Coin",
   "item.nibanking.debit_card": "Debit Card",
+  "item.nibanking.pda": "PDA",
 
   "_comment.toolTips": "Item ToolTips",
   "tooltip.nibanking.coin_item": "&7Value: &6$value"

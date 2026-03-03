@@ -17,6 +17,7 @@ public class NICreativeTab {
                     .title(Component.translatable("itemGroup.nibanking"))
                     .icon(NIItems.NIBANKING_SYSTEM_ITEMS.get("base_coin")::asStack)
                     .displayItems((param, output) -> {
+                        NIItems.NIBANKING_COINS.forEach((id, item) -> output.accept(item.asStack()));
                         NIItems.NIBANKING_ITEMS.forEach((id, item) -> output.accept(item.asStack()));
                         output.accept(NIItems.NIBANKING_SYSTEM_ITEMS.get("debit_card").asStack());
                     })

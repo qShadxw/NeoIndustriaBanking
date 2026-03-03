@@ -4,10 +4,14 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.slf4j.Logger;
 import uk.co.tmdavies.nibanking.files.ConfigFile;
 import uk.co.tmdavies.nibanking.items.NICreativeTab;
@@ -15,6 +19,8 @@ import uk.co.tmdavies.nibanking.items.NIItems;
 import uk.co.tmdavies.nibanking.listeners.ServerListener;
 import uk.co.tmdavies.nibanking.managers.NNWebSocket;
 import uk.co.tmdavies.nibanking.managers.NeoNetworkIRS;
+import uk.co.tmdavies.nibanking.screen.ModMenuTypes;
+import uk.co.tmdavies.nibanking.screen.custom.PDAScreen;
 
 @Mod(NIBanking.MODID)
 public class NIBanking {
@@ -38,11 +44,31 @@ public class NIBanking {
         REGISTRATE.registerEventListeners(modEventBus);
         NIItems.register();
         NICreativeTab.register(modEventBus);
+        ModMenuTypes.register(modEventBus);
 
         NeoForge.EVENT_BUS.register(new ServerListener());
+        NeoForge.EVENT_BUS.register(this);
     }
 
     public void commonSetup(FMLCommonSetupEvent event) {
         LOGGER.info("Setting up...");
+    }
+
+//    @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @EventBusSubscriber
+    public static class ClientModEvents {
+        @SubscribeEvent
+        public static void registerScreens(RegisterMenuScreensEvent event) {
+            event.register(ModMenuTypes.PDA_MENU.get(), PDAScreen::new);
+        }
+    }
+
+    public int timer = 0;
+    @SubscribeEvent
+    public void onServerTick(ServerTickEvent.Post event) {
+        timer++;
+        if (timer == 400) {
+            TestingFunctions.bareShop(event.getServer().getAllLevels().iterator().next());
+        }
     }
 }

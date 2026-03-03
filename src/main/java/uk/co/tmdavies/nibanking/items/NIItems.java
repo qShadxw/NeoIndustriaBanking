@@ -13,12 +13,16 @@ public class NIItems {
     }};
 
     // Items
-    public static final HashMap<String, ItemEntry<?>> NIBANKING_ITEMS = new HashMap<>() {{
+    public static final HashMap<String, ItemEntry<?>> NIBANKING_COINS = new HashMap<>() {{
         put("copper_coin", NIBanking.REGISTRATE.item("copper_coin", prop -> new CoinItem(1, prop)).register());
         put("iron_coin", NIBanking.REGISTRATE.item("iron_coin", prop -> new CoinItem(5, prop)).register());
         put("zinc_coin", NIBanking.REGISTRATE.item("zinc_coin", prop -> new CoinItem(10, prop)).register());
         put("gold_coin", NIBanking.REGISTRATE.item("gold_coin", prop -> new CoinItem(25, prop)).register());
         put("netherite_coin", NIBanking.REGISTRATE.item("netherite_coin", prop -> new CoinItem(50, prop)).register());
+    }};
+
+    public static final HashMap<String, ItemEntry<?>> NIBANKING_ITEMS = new HashMap<>() {{
+        put("pda", NIBanking.REGISTRATE.item("pda", prop -> new PDAItem(prop)).register());
     }};
 
     public static void register() {}
