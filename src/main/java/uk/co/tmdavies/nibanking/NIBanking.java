@@ -47,7 +47,6 @@ public class NIBanking {
         ModMenuTypes.register(modEventBus);
 
         NeoForge.EVENT_BUS.register(new ServerListener());
-        NeoForge.EVENT_BUS.register(this);
     }
 
     public void commonSetup(FMLCommonSetupEvent event) {
@@ -60,15 +59,6 @@ public class NIBanking {
         @SubscribeEvent
         public static void registerScreens(RegisterMenuScreensEvent event) {
             event.register(ModMenuTypes.PDA_MENU.get(), PDAScreen::new);
-        }
-    }
-
-    public int timer = 0;
-    @SubscribeEvent
-    public void onServerTick(ServerTickEvent.Post event) {
-        timer++;
-        if (timer == 400) {
-            TestingFunctions.bareShop(event.getServer().getAllLevels().iterator().next());
         }
     }
 }

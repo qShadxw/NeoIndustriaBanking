@@ -1,8 +1,15 @@
 package uk.co.tmdavies.nibanking.utils;
 
+import com.simibubi.create.content.logistics.packagerLink.LogisticsManager;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 import uk.co.tmdavies.nibanking.NIBanking;
+import uk.co.tmdavies.nibanking.objects.Pair;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Utils {
@@ -25,5 +32,24 @@ public class Utils {
                 uuidString.substring(12, 16) + "-" +
                 uuidString.substring(16, 20) + "-" +
                 uuidString.substring(20, 32));
+    }
+
+    public static void dumpFields(Object... obj) {
+        for (Object object : obj) {
+            for (Field field : object.getClass().getFields()) {
+                try {
+                    NIBanking.LOGGER.info("{}: [{}]", field.getName(), field.get(field.getName()));
+                } catch (IllegalAccessException exception) {
+                    NIBanking.LOGGER.error("Illegal Access: {}", (Object) exception.getStackTrace());
+                }
+            }
+        }
+    }
+
+    @SafeVarargs
+    public static void dumpVars(Pair<Object, Object>... objs) {
+        for (Pair<Object, Object> pair : objs) {
+            NIBanking.LOGGER.info("{}: [{}]", pair.a(), pair.b());
+        }
     }
 }

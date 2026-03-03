@@ -64,7 +64,6 @@ public class NeoNetworkIRS {
             }
 
             in.close();
-            NIBanking.LOGGER.info(response.toString());
 
             return JsonParser.parseString(response.toString()).getAsJsonObject();
         } catch (IOException exception) {

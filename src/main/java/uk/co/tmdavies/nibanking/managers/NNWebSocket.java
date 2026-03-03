@@ -4,11 +4,14 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour;
+import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
-import org.codehaus.plexus.util.CachedMap;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import uk.co.tmdavies.nibanking.NIBanking;
 import uk.co.tmdavies.nibanking.objects.NNTransaction;
+import uk.co.tmdavies.nibanking.objects.Pair;
 import uk.co.tmdavies.nibanking.utils.Utils;
 
 import java.net.URI;
@@ -32,6 +35,7 @@ public class NNWebSocket implements WebSocket.Listener {
     public NNWebSocket(String endPoint, String apiKey, MinecraftServer server) {
         this.endPoint = endPoint;
         this.apiKey = apiKey;
+        // https://github.com/google/guava/issues/2110#issuecomment-517955149
         this.transactionCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(Duration.ofMinutes(2L))
                 .removalListener((removalNotification) ->
@@ -41,8 +45,25 @@ public class NNWebSocket implements WebSocket.Listener {
         this.server = server;
     }
 
+    public NNTransaction getTransactionFromID(String transactionId) {
+        for (NNTransaction transaction : this.transactionsList) {
+            if (transaction.getTransactionId().equals(transactionId)) {
+                return transaction;
+            }
+        }
+
+        return this.transactionCache.getIfPresent(transactionId);
+    }
+
     public NNTransaction getTransactionFromPlayer(Player player) {
         String playerUUID = player.getStringUUID().replace("-", "");
+
+        for (NNTransaction transaction : this.transactionsList) {
+            if (transaction.getFromUUID().equals(playerUUID)) {
+                return transaction;
+            }
+        }
+
         for (Map.Entry<String, NNTransaction> entry : transactionCache.asMap().entrySet()) {
             NNTransaction transaction = entry.getValue();
 
@@ -52,6 +73,32 @@ public class NNWebSocket implements WebSocket.Listener {
         }
 
         return null;
+    }
+
+    public void updateTransaction(NNTransaction transaction) {
+        NNTransaction oldTransaction = null;
+
+        for (NNTransaction tList : this.transactionsList) {
+            if (tList.getTransactionId().equals(transaction.getTransactionId())) {
+                oldTransaction = tList;
+                break;
+            }
+        }
+
+        if (oldTransaction == null) {
+            this.transactionsList.add(transaction);
+
+            return;
+        }
+
+        this.transactionsList.remove(oldTransaction);
+        this.transactionsList.add(transaction);
+    }
+
+    public void removeTransaction(NNTransaction transaction) {
+        NIBanking.LOGGER.info("Calling removeTransaction on {}", transaction.getTransactionId());
+        this.transactionCache.invalidate(transaction.getTransactionId());
+        this.transactionsList.remove(transaction);
     }
 
     public void connect() {
@@ -85,9 +132,6 @@ public class NNWebSocket implements WebSocket.Listener {
 
     @Override
     public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
-
-
-
         JsonObject response = JsonParser.parseString(String.valueOf(data)).getAsJsonObject();
 
         switch (response.get("event").getAsString()) {
@@ -140,25 +184,33 @@ public class NNWebSocket implements WebSocket.Listener {
 
     public void onMigratorRequest(String fromUUID, String toUUID, String transactionId, int amount, String reference) {
         NIBanking.LOGGER.info("[NNWebSocket] Request called: [{}] [{}] [{}] [{}] [{}]", fromUUID, toUUID, transactionId, amount, reference);
-        this.transactionCache.put(transactionId, new NNTransaction(transactionId, toUUID, fromUUID, amount, reference, false));
+        this.transactionCache.put(transactionId, new NNTransaction(transactionId, toUUID, fromUUID, amount, reference, null, null, null, false));
     }
 
     public void onMigratorApprove(String transactionId, boolean approved) {
         NIBanking.LOGGER.info("[NNWebSocket] Approve called: [{}] [{}]", transactionId, approved);
 
-        NNTransaction transaction = this.transactionCache.getIfPresent(transactionId);
+        NNTransaction transaction = getTransactionFromID(transactionId);
 
         if (transaction == null) {
             return;
         }
 
         transaction.setComplete(true);
-        this.transactionsList.add(transaction);
+
+        updateTransaction(transaction);
 
         NIBanking.LOGGER.info("[NNWebSocket] Got transaction: [{}] [{}] [{}]", transaction.getTransactionId(), transaction.getToUUID(), transaction.getFromUUID());
     }
 
     public void onTransactionTimeout(String transactionId, NNTransaction transaction) {
+        NIBanking.LOGGER.info("[NNWebSocket] Timeout called: [{}] [{}]", transactionId, transaction);
+        NNTransaction updatedTransaction = getTransactionFromID(transactionId);
+
+        if (updatedTransaction.isComplete()) {
+            return;
+        }
+
         UUID toUUID = Utils.reconstructUUID(transaction.getToUUID());
         UUID fromUUID = Utils.reconstructUUID(transaction.getFromUUID());
 
@@ -191,12 +243,6 @@ public class NNWebSocket implements WebSocket.Listener {
     }
 
     public boolean isTransactionComplete(NNTransaction transaction) {
-        for (NNTransaction loopTransaction : this.transactionsList) {
-            if (loopTransaction.getTransactionId().equals(transaction.getTransactionId())) {
-                return loopTransaction.isComplete();
-            }
-        }
-
-        return transaction.isComplete();
+        return getTransactionFromID(transaction.getTransactionId()) == null;
     }
 }
