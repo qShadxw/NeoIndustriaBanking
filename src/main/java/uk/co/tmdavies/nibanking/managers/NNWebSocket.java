@@ -4,14 +4,10 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour;
-import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import uk.co.tmdavies.nibanking.NIBanking;
 import uk.co.tmdavies.nibanking.objects.NNTransaction;
-import uk.co.tmdavies.nibanking.objects.Pair;
 import uk.co.tmdavies.nibanking.utils.Utils;
 
 import java.net.URI;
@@ -35,7 +31,6 @@ public class NNWebSocket implements WebSocket.Listener {
     public NNWebSocket(String endPoint, String apiKey, MinecraftServer server) {
         this.endPoint = endPoint;
         this.apiKey = apiKey;
-        // https://github.com/google/guava/issues/2110#issuecomment-517955149
         this.transactionCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(Duration.ofMinutes(2L))
                 .removalListener((removalNotification) ->
