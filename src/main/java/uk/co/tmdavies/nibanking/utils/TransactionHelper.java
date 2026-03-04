@@ -11,7 +11,6 @@ import net.createmod.catnip.data.Couple;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import uk.co.tmdavies.nibanking.NIBanking;
 
 public class TransactionHelper {
 

@@ -32,14 +32,12 @@ public class ServerListener {
         NIBanking.LOGGER.info("Server is Starting...");
 
         // Files
-        NIBanking.configFile = new ConfigFile("config");
-        NIBanking.configFile.loadConfig();
-
         NIBanking.connectionsFile = new ConfigFile("connections");
         NIBanking.connectionsFile.loadConfig();
 
         // API
-        NIBanking.neoNetworkIRS = new NeoNetworkIRS(NIBanking.connectionsFile.get("NeoNetworkIRS").getAsJsonObject().get("apikey").getAsString());
+        NIBanking.neoNetworkIRS = new NeoNetworkIRS(NIBanking.connectionsFile.get("NeoNetworkIRS").getAsJsonObject().get("url").getAsString(),
+                NIBanking.connectionsFile.get("NeoNetworkIRS").getAsJsonObject().get("apikey").getAsString());
         NIBanking.webSocket = new NNWebSocket(NIBanking.connectionsFile.get("WebSocket").getAsJsonObject().get("url").getAsString(),
                 NIBanking.connectionsFile.get("WebSocket").getAsJsonObject().get("apikey").getAsString(),
                 event.getServer());
@@ -56,7 +54,6 @@ public class ServerListener {
     public void onServerTick(ServerTickEvent.Post event) {
         timer++;
         if (timer == 40) {
-            NIBanking.LOGGER.info(NIBanking.webSocket.transactionCache.asMap().toString());
             if (NIBanking.webSocket.transactionsList.isEmpty()) {
                 timer = 0;
                 return;

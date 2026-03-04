@@ -32,7 +32,6 @@ public class NIBanking {
 
     // Files
     public static ConfigFile connectionsFile;
-    public static ConfigFile configFile;
 
     // API
     public static NNWebSocket webSocket;
@@ -53,7 +52,6 @@ public class NIBanking {
         LOGGER.info("Setting up...");
     }
 
-//    @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     @EventBusSubscriber
     public static class ClientModEvents {
         @SubscribeEvent

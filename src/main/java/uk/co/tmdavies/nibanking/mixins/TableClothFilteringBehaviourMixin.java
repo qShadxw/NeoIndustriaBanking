@@ -104,8 +104,6 @@ public class TableClothFilteringBehaviourMixin {
         FilteringBehaviourAccessor accessor = (FilteringBehaviourAccessor) self;
         accessor.setCount(Math.min(actualValue, 11600));
 
-//        self.blockEntity.setChanged();
-//        self.blockEntity.sendData();
         ci.cancel();
     }
 }

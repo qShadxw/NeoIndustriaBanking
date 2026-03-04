@@ -21,6 +21,7 @@ import uk.co.tmdavies.nibanking.items.NIItems;
 import uk.co.tmdavies.nibanking.objects.NNTransaction;
 import uk.co.tmdavies.nibanking.utils.CurrencyHelper;
 import uk.co.tmdavies.nibanking.utils.TransactionHelper;
+import uk.co.tmdavies.nibanking.utils.Utils;
 
 @Mixin(com.simibubi.create.content.logistics.stockTicker.StockTickerInteractionHandler.class)
 public class StockTickerInteractionHandlerMixin {
@@ -89,6 +90,8 @@ public class StockTickerInteractionHandlerMixin {
                 transaction.setLevel(level);
                 transaction.setTickerBE(tickerBE);
                 transaction.setShoppingListCopy(mainHandItem.copy());
+
+                player.sendSystemMessage(Utils.Chat("&7Please accept the request in your PDA. [txID: &6%s&7]", transaction.getTransactionId()));
 
                 NIBanking.webSocket.updateTransaction(transaction);
 

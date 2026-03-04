@@ -56,8 +56,8 @@ public class ConfigFile {
 
         if (file.length() == 0) {
             switch (this.fileName) {
-                case "config.json" -> setDefaultsForConfig();
                 case "connections.json" -> setDefaultsForConnections();
+                default -> NIBanking.LOGGER.error("Unexpected Config Name.");
             }
         }
 
@@ -72,23 +72,17 @@ public class ConfigFile {
         JsonObject connectionObject = new JsonObject();
 
         JsonObject neoNetworkIRSObj = new JsonObject();
+        neoNetworkIRSObj.addProperty("url", "https://www.example.com/api/");
         neoNetworkIRSObj.addProperty("apikey", "01189998819991197253");
 
         JsonObject webSocketObj = new JsonObject();
-        webSocketObj.addProperty("url", "ws://ws.example.com:443");
+        webSocketObj.addProperty("url", "ws://ws.example.com");
         webSocketObj.addProperty("apikey", "69420");
 
         connectionObject.add("NeoNetworkIRS", neoNetworkIRSObj);
         connectionObject.add("WebSocket", webSocketObj);
 
         pushToFile(connectionObject);
-    }
-
-    public void setDefaultsForConfig() {
-        // Main Object
-        JsonObject configObject = new JsonObject();
-
-        pushToFile(configObject);
     }
 
     public void pushToFile(JsonObject objectToPush) {

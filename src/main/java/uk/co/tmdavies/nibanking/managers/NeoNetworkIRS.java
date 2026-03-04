@@ -18,13 +18,14 @@ import java.util.Map;
 
 public class NeoNetworkIRS {
 
-    private static final String endPoint = "https://irs.neonetwork.xyz/api/";
-    private static final String LINE_END = "\r\n";
-    private static final String twoHyphens = "--";
-    private static final String boundary = "*****"; // Change this string to a unique boundary
+    private final String endPoint;
+    private final String LINE_END = "\r\n";
+    private final String twoHyphens = "--";
+    private final String boundary = "*****"; // Change this string to a unique boundary
     private final String apiKey;
 
-    public NeoNetworkIRS(String apiKey) {
+    public NeoNetworkIRS(String endPoint, String apiKey) {
+        this.endPoint = endPoint;
         this.apiKey = apiKey;
     }
 
@@ -81,9 +82,6 @@ public class NeoNetworkIRS {
             put("reference", ref);
         }};
         JsonObject response = doRequest("send", data);
-
-        target.sendSystemMessage(Utils.Chat("&a+£%s", amount));
-        target.sendSystemMessage(Utils.Chat("&aRef: %s", ref));
     }
 
     public void requestMoney(String shopKeeper, String customer, int amount, String ref) {
@@ -94,12 +92,5 @@ public class NeoNetworkIRS {
             put("reference", ref);
         }};
         JsonObject response = doRequest("request", data);
-//
-//        if (response.get("success").getAsBoolean()) {
-//           shopKeeper.sendSystemMessage(Utils.Chat("Requested money from %s. Amount: %d. Transaction ID: %s",
-//                    customer.getName().toString(), amount, response.get("data").getAsJsonObject().get("txID").getAsString()));
-//            customer.sendSystemMessage(Utils.Chat("Sending money to %s. Amount: %d. Transaction ID: %s",
-//                    shopKeeper, amount, response.get("data").getAsJsonObject().get("txID").getAsString()));
-//        }
     }
 }
